@@ -15,6 +15,11 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.session:spring-session-jdbc'
+	implementation 'org.jeasy:easy-random-core:5.0.0'
+	implementation 'org.apache.httpcomponents:httpclient:4.5.13'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
 	runtimeOnly 'com.h2database:h2'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

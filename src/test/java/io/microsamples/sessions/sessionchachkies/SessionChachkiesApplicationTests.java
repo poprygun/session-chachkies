@@ -1,14 +1,15 @@
 package io.microsamples.sessions.sessionchachkies;
 
-import org.junit.jupiter.api.Test;
+import org.jeasy.random.EasyRandom;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.ByteArrayInputStream;
 import java.io.ObjectInput;
@@ -23,13 +24,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(
 		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class SessionChachkiesApplicationTests {
+
+	private EasyRandom easyRandom;
 
 	@LocalServerPort
 	private int port;
 
-	@Autowired
-	private TestRestTemplate testRestTemplate;
+//	@Autowired
+	private RestTemplate testRestTemplate;
 
 	private List<String> getSessionIdsFromDatabase()
 			throws SQLException {
@@ -66,10 +70,15 @@ class SessionChachkiesApplicationTests {
 		return stat.executeQuery(sql);
 	}
 
-	@Test
-	void whenH2DbIsQueried_thenOneSessionIsCreated()
-			throws SQLException {
+	@BeforeEach
+	void setUp(){
+		easyRandom = new EasyRandom();
+		testRestTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+	}
 
+	@Test
+	@Order(0)
+	void whenH2DbIsQueried_thenOneSessionIsCreated() throws SQLException {
 		assertThat(this.testRestTemplate.getForObject(
 				"http://localhost:" + port + "/", String.class))
 				.isNotEmpty();
@@ -77,20 +86,19 @@ class SessionChachkiesApplicationTests {
 	}
 
 	@Test
-	void whenH2DbIsQueried_thenSessionAttributeIsRetrieved()
-			throws Exception {
+	void whenH2DbIsQueried_thenSessionAttributeIsRetrieved() throws Exception {
 
-		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-		map.add("color", "red");
+		final Chachkie chachkieToSave = easyRandom.nextObject(Chachkie.class);
 		this.testRestTemplate.postForObject(
-				"http://localhost:" + port + "/saveColor", map, String.class);
+				"http://localhost:" + port + "/save", chachkieToSave, String.class);
+
 		List<byte[]> queryResponse = getSessionAttributeBytesFromDatabase();
 
-		assertEquals(1, queryResponse.size());
+		assertThat(queryResponse.size()).isEqualTo(1);
 		ObjectInput in = new ObjectInputStream(
 				new ByteArrayInputStream(queryResponse.get(0)));
-		List<String> obj = (List<String>) in.readObject();
-		assertEquals("red", obj.get(0));
+		List<Chachkie> obj = (List<Chachkie>) in.readObject();
+		assertThat(obj.get(0)).isEqualTo(chachkieToSave);
 	}
 
 }
