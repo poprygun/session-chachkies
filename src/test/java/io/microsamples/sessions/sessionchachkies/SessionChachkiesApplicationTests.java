@@ -7,9 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.ByteArrayInputStream;
 import java.io.ObjectInput;
@@ -32,8 +30,8 @@ class SessionChachkiesApplicationTests {
 	@LocalServerPort
 	private int port;
 
-//	@Autowired
-	private RestTemplate testRestTemplate;
+	@Autowired
+	private TestRestTemplate testRestTemplate;
 
 	private List<String> getSessionIdsFromDatabase()
 			throws SQLException {
@@ -73,7 +71,6 @@ class SessionChachkiesApplicationTests {
 	@BeforeEach
 	void setUp(){
 		easyRandom = new EasyRandom();
-		testRestTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
 	}
 
 	@Test
