@@ -14,6 +14,7 @@ public class SessionInterceptor implements HandlerInterceptor {
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse arg1,
                            Object arg2, ModelAndView arg3) {
+        log.info("👀 Remote IP {}", request.getRemoteHost());
         log.info("👀 {}", request.getSession().getId());
     }
 
